@@ -157,4 +157,4 @@ npx cypress run --spec "src/pages/AddCard.cy.jsx"
 
 ---
 
-**Curso desenvolvido com ❤️ pelo [Papito]("https://www.udemy.com/course/testando-componentes-com-cypress/")**
+**Curso desenvolvido com pelo** [Papito](https://www.udemy.com/course/testando-componentes-com-cypress)
