@@ -6,13 +6,35 @@ Cypress.Commands.add('alertErrorHaveText', (expectedText) => {
     .should('be.visible')
 })
 
+Cypress.Commands.add('fillCardForm', (card) => {
+  cy.get('[data-cy="number"]').type(card.number)
+  cy.get('[data-cy="holderName"]').type(card.holderName)
+  cy.get('[data-cy="expirationDate"]').type(card.expirationDate)
+  cy.get('[data-cy="cvv"]').type(card.cvv)
+  cy.get(`[data-cy="bank-${card.bank}"]`).click()
+})
+
+Cypress.Commands.add('submitCardForm', () => {
+  cy.get('[data-cy="saveMyCard"]').click()
+})
+
 describe('<AddCard />', () => {
-  it('exibe erros quando os campos não são informados', () => {
-    // see: https://on.cypress.io/mounting-react
+
+  const myCard = {
+    number: '4242424242424242',
+    holderName: 'John Doe',
+    expirationDate: '12/35',
+    cvv: '123',
+    bank: 'neon'
+  }
+
+  beforeEach(() => {
     cy.viewport(1440, 900)
     cy.mount(<AddCard />)
+  })
 
-    cy.contains('button', 'Adicionar Cartão').click()
+  it('exibe erros quando os campos não são informados', () => {
+    cy.submitCardForm()
 
     const alerts = [
       'Número do cartão é obrigatório',
@@ -27,49 +49,38 @@ describe('<AddCard />', () => {
     })
   })
 
-  it.only('deve cadastrar um novo cartão de crédito', () => {
-    cy.viewport(1440, 900)
-    cy.mount(<AddCard />)
+  it('deve cadastrar um novo cartão de crédito', () => {
+    cy.fillCardForm(myCard)
 
-    const myCard = {
-      number: '4242424242424242',
-      holderName: 'John Doe',
-      expirationDate: '12/35',
-      cvv: '123',
-      bank: 'neon'
-    }
-
-    cy.contains('label', 'Número do Cartão')
-      .parent()
-      .find('input').type(myCard.number)
-
-    cy.contains('label', 'Nome do Titular')
-      .parent()
-      .find('input').type(myCard.holderName)
-
-    cy.contains('label', 'Validade')
-      .parent()
-      .find('input').type(myCard.expirationDate)
-
-    cy.contains('label', 'CVV')
-      .parent()
-      .find('input').type(myCard.cvv)
-
-    cy.get(`[data-cy="bank-${myCard.bank}"]`).click()
-    //cy.contains('button', 'Neon').click()
-    //cy.contains('button', 'Adicionar Cartão').click()
-
-    cy.intercept('POST', 'http://wallet.cardfify.dev/api/cards', (req) => {
+    cy.intercept('POST', 'https://wallet.cardfify.dev/api/cards', (req) => {
       req.reply({
         statusCode: 201,
         body: myCard
       })
     }).as('addCard')
 
-    cy.get('[data-cy="saveMyCard"]').click()
+    cy.submitCardForm()
     cy.wait('@addCard')
     cy.get('.notice-success')
       .should('be.visible')
       .and('have.text', 'Cartão cadastrado com sucesso!')
+  })
+
+  it('valida nome do titular com menos de 2 caracteres', () => {
+    cy.fillCardForm({ ...myCard, holderName: 'J' }) // Spread Operator
+    cy.submitCardForm()
+    cy.alertErrorHaveText('Nome deve ter pelo menos 2 caracteres')
+  })
+
+  it('valida data de expiração inválida', () => {
+    cy.fillCardForm({ ...myCard, expirationDate: '12/20' })
+    cy.submitCardForm()
+    cy.alertErrorHaveText('Data de expiração inválida ou vencida')
+  })
+
+  it('valida CVV com menos de 3 dígitos', () => {
+    cy.fillCardForm({ ...myCard, cvv: '1' })
+    cy.submitCardForm()
+    cy.alertErrorHaveText('CVV deve ter 3 ou 4 dígitos')
   })
 })

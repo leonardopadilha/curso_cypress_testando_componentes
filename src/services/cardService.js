@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://wallet.cardfify.dev/api/cards';
+const API_BASE_URL = 'https://wallet.cardfify.dev/api/cards';
 
 export const cardService = {
   async getCards() {

@@ -223,6 +223,7 @@ const AddCard = () => {
                   Número do Cartão
                 </label>
                 <input
+                  data-cy="number"
                   type="text"
                   value={cardData.number}
                   onChange={(e) => handleInputChange('number', e.target.value)}
@@ -244,6 +245,7 @@ const AddCard = () => {
                   Nome do Titular
                 </label>
                 <input
+                  data-cy="holderName"
                   type="text"
                   value={cardData.holderName}
                   onChange={(e) => handleInputChange('holderName', e.target.value)}
@@ -265,6 +267,7 @@ const AddCard = () => {
                     Validade
                   </label>
                   <input
+                    data-cy="expirationDate"
                     type="text"
                     value={cardData.expirationDate}
                     onChange={(e) => handleInputChange('expirationDate', e.target.value)}
@@ -287,6 +290,7 @@ const AddCard = () => {
                   </label>
                   <div className="relative">
                     <input
+                      data-cy="cvv"
                       type={showCVV ? 'text' : 'password'}
                       value={cardData.cvv}
                       onChange={(e) => handleInputChange('cvv', e.target.value)}
